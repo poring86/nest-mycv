@@ -14,12 +14,12 @@ import {
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dtos/update-user.dto';
-import { Serialize } from 'src/interceptors/serialize.interceptor';
 import { UserDto } from './dtos/user.dto';
 import { AuthService } from './auth.service';
-import { CurrentUser } from 'src/users/decorators/current-user.decorator';
+import { CurrentUser } from '../users/decorators/current-user.decorator';
 import { User } from './user.entity';
-import { AuthGuard } from 'src/guards/auth.guard';
+import { AuthGuard } from '../guards/auth.guard';
+import { Serialize } from '../interceptors/serialize.interceptor';
 
 @Controller('auth')
 @Serialize(UserDto)
@@ -55,14 +55,18 @@ export class UsersController {
   async signin(@Body() body: CreateUserDto, @Session() session: any) {
     const user = await this.authService.signin(body.email, body.password);
     session.userId = user.id;
+    return user;
   }
 
   // Interceptors -> Customize data return
   // @UseInterceptors(new SerializeInterceptor(UserDto))
   @Get('/:id')
-  findUser(@Param('id') id: string) {
-    console.log('handler is running');
-    return this.usersService.findOne(parseInt(id));
+  async findUser(@Param('id') id: string) {
+    const user = await this.usersService.findOne(parseInt(id));
+    if (!user) {
+      throw new NotFoundException('user not found');
+    }
+    return user;
   }
 
   @Get()
