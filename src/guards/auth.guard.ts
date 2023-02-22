@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { CanActivate, ExecutionContext } from '@nestjs/common';
 
 export class AuthGuard implements CanActivate {
